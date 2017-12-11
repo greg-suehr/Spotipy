@@ -1,0 +1,6 @@
+gr*
+img/*
+*.pyc
+*~
+*.pw
+*.p # pickled files
