@@ -1,8 +1,7 @@
 from spotipy import Spotify
-import spotipy.util as utilfrom spotipy import Spotify
 import spotipy.util as util
 
-def get_playlist_tracks( user, pid ):
+def get_all_playlist_tracks( user, pid ):
     """builds list of (track, artist) of playlist uri"""
 
     response = sp.user_playlist_tracks(user, playlist_id = pid)
@@ -21,7 +20,7 @@ def get_playlist_tracks( user, pid ):
     return tracks
             
 
-def build_user_playlists( user, limit=50):
+def get_all_user_playlists( user, limit=50):
     """returns a list of user-made playlist pids"""
     
     nams = []
@@ -35,27 +34,31 @@ def build_user_playlists( user, limit=50):
         nams += [ item['name'] for item in response['items'] if item['owner']['id'] == user ]
         offset += limit
 
-    return pids
+    return pids, nams
     for i in range(len(pids)):        
-        print pids[i], nams[i]
+        print(pids[i], nams[i])
 
 
 from collections import defaultdict, Counter
 from time import sleep 
 
-def count_tracks(user):
+def count_all_playlist_tracks(user):
     score = Counter()
 
-    user_pids = build_user_playlists(user)
-    for pid in user_pids:
-        print "processing %s... " % pid
+    user_pids, playlist_names = get_all_user_playlists(user)
+    for i, pid in enumerate(user_pids):
+        print("processing %s... " % playlist_names[i])
         sleep(1)
-        for i in get_playlist_tracks(user, pid):
-            score[ i ] += 1
+        for _ in get_all_playlist_tracks(user, pid):
+            score[ _ ] += 1
 
-    for k, v in score.iteritems():
-        print "%30s: %d" % (k,v)
-    return scorey
+    
+    g = open('scores.dat', 'w')
+    for k, v in score.items():
+        g.write("%30s# %d\n" % (k,v))
+#        print("%30s: %d" % (k,v))
+    g.close()
+    return score
 
 
 if __name__ == "__main__":
@@ -63,4 +66,4 @@ if __name__ == "__main__":
     token = util.prompt_for_user_token(user, 'playlist-read-private')
     sp = Spotify(auth=token)
 
-    count_tracks(user)
+    count_all_playlist_tracks(user)
