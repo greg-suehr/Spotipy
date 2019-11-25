@@ -11,7 +11,7 @@
 import sqlite3
 # import framework # TODO: define a framework module for messaging, etc
 from collections import defaultdict
-from sqlite3_util import stringify_list, field_to_indice, select_primary_key
+from sqlite3_util import stringify_list, unpack_list_of_tuples, field_to_indice, select_primary_key
 
 DATASTORE = 'spotipy.db'  # TODO: load per-application configurations from .conf
 LIMIT = 50  # universal limit for all requests
@@ -64,11 +64,11 @@ def load_from_datastore(c, store_table_name, identifier_fields, identifiers):
                                                                     store_table_name,
                         identifier_fields[0], "','".join(identifiers).join(["'","'",])))
     found_ids = results.fetchall()
-    
+    found_ids = unpack_list_of_tuples(found_ids)
     missing_ids = []
-    for identifier_tuple in identifier_fields:
-        if identifier_tuple not in identifier_fields:
-            missing.append(identifier_tuple)
+    for identifier_tuple in identifiers:
+        if identifier_tuple not in found_ids:
+            missing_ids.append(identifier_tuple)
 
     return { 'found': found, 'missing': missing_ids }
 

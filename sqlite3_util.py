@@ -12,6 +12,13 @@ def stringify_list(l):
         m[i] = str(_)
     return m
 
+def unpack_list_of_tuples(l):
+    """Take a list of 1-tuples, e.g. [(1,),(2,),...], and return a list of strings"""
+    m = [None] * len(l)
+    for i, _ in enumerate(l):
+        m[i] = str(_[0])
+    return m
+
 def field_to_indice(cursor, field_name, table=None):
     """Use a sqlite3 cursor.description to translate field names into the indice we'll
        find that data in the returned tuples.
