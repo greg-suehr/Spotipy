@@ -4,6 +4,7 @@ Spotipy
 Spotipy is a lightweight Python library for the Spotify Web API. Learn more:
   - https://spotipy.readthedocs.io/en/latest/
   - https://developer.spotify.com/documentation/web-api/
+  - https://developer.spotify.com/documentation/web-api/reference/object-model/
 This is a lightweight data cache and analysis environment as well as a few convenience
 scripts build on the Spotify Web API.
 

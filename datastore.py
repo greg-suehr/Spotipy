@@ -1,7 +1,3 @@
-import sqlite3
-# import framework # TODO: define a framework module for messaging, etc
-from collections import defaultdict
-
 # Datastore is a per-application instance of the Datastore framework
 # A Store is a database table mapping (identifier, data)
 # The Cache is a key store of data from various Stores used in analysis
@@ -12,43 +8,15 @@ from collections import defaultdict
 #    - get_all requests typically implement a `while, offset` loop around API requests
 #    - get_by_ids may do the same, unless size(ids) is less than the API's limit
 
+import sqlite3
+# import framework # TODO: define a framework module for messaging, etc
+from collections import defaultdict
+from sqlite3_util import stringify_list, field_to_indice, select_primary_key
 
 DATASTORE = 'spotipy.db'  # TODO: load per-application configurations from .conf
 LIMIT = 50  # universal limit for all requests
 
 conn = sqlite3.connect(DATASTORE)
-
-
-# These are actually sqlite3 utility functions - should be broken out
-def field_to_indice(cursor, field_name, table=None):
-    """Use a sqlite3 cursor.description to translate field names into the indice we'll
-       find that data in the returned tuples.
-
-       Specify `table` to provide a better error message.
-    """
-    mapping = defaultdict()
-    for indice, _ in enumerate(cursor.description):
-        if _[0] == field_name: # _ = ('request_format',None,None,None,None,None,None)
-            return indice 
-
-    # TODO: Report ERROR, WARNING, MESSAGE up to a framework module
-    if table is not None:
-        raise ValueError('%s is not a field in %s.' % (field_name, table))
-    else:
-        raise ValueError('%s is not a known field.' % field_name)
-
-def select_primary_key(conn, table):
-    c = conn.cursor()
-    results = c.execute("PRAGMA TABLE_INFO(%s)" % table)
-    pk_field = field_to_indice(results, 'pk')
-    name_field = field_to_indice(results, 'name')
-    
-    for _ in results:
-        if _[pk_field] == 1:
-            return _[name_field]
-
-    raise ValueError('%s doesnt have a primary key?!')
-
 
 # Thus begins the DataStore
 def interpret_request(conn, request_format):
@@ -68,13 +36,43 @@ def interpret_request(conn, request_format):
     store_table_name = field_to_indice(results, 'store_table_name', 'request_mappings')
     return store[0][store_table_name]
 
-
-def load_from_datastore(conn, store_table_name, identifiers):
+def load_from_datastore(c, store_table_name, identifier_fields, identifiers):
     """Load seen data from a local Store into the Cache.
-    """
-    pass
+    
+    Args:
+        c (sqlite3.Cursor): cursor to the Datastore
+        store_table_name (string): request_mapping.store_table_name
+        identifier_fields (list): list of field_mapping.fields in $store_table_name
+        identifiers (list): list of tuples, must match the size of identifier_fields
+         NOTE: multi-field lookups are not yet supported.
 
-def load_from_service(conn, store_table_name, identifiers):
+    Returns:
+        results (dict): a one level dict containing two lists:
+            found: a flexible list of data from the Datastore
+            missed: a trimmed list of identifiers to pass along
+    """
+    identifiers = stringify_list(identifiers)
+    # TODO: verify store_table_name exists in the schema?
+    #       or interpret the sqliteOperationalError later?
+    # TODO: verify that len(identifier_fields) == len(identifiers[0]) ? or save time?
+    results = c.execute("""SELECT * FROM %s WHERE %s IN (%s)""" % (store_table_name,  
+                        identifier_fields[0], "','".join(identifiers).join(["'","'",])))
+    # TODO: reformat load_from_datastore to support multi-field lookups
+    found = results.fetchall()
+
+    results = c.execute("""SELECT %s FROM %s WHERE %s IN (%s)""" % (identifier_fields[0],  
+                                                                    store_table_name,
+                        identifier_fields[0], "','".join(identifiers).join(["'","'",])))
+    found_ids = results.fetchall()
+    
+    missing_ids = []
+    for identifier_tuple in identifier_fields:
+        if identifier_tuple not in identifier_fields:
+            missing.append(identifier_tuple)
+
+    return { 'found': found, 'missing': missing_ids }
+
+def load_from_service(cursor, store_table_name, identifiers):
     """Load unseen data from a local Store into the Cache.
     """
     pass

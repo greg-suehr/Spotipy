@@ -1,8 +1,8 @@
 import unittest
-from datastore import field_to_indice, select_primary_key
-     # TODO: eventually, these methods will be moved to sqlite3_util
-
 import sqlite3 
+
+from sqlite3_util import stringify_list, field_to_indice, select_primary_key
+
 class field_to_indice_tester(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         self.conn = sqlite3.connect('test.db')
