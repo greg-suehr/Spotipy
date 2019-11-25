@@ -37,7 +37,7 @@ def field_to_indice(cursor, field_name, table=None):
         raise ValueError('%s is not a known field.' % field_name)
 
 def select_primary_key(conn, table):
-    c = conn.cursor()
+    c = conn.cursor() # TODO: figure out when I should be passing Connections vs Cursors
     results = c.execute("PRAGMA TABLE_INFO(%s)" % table)
     pk_field = field_to_indice(results, 'pk')
     name_field = field_to_indice(results, 'name')
@@ -47,3 +47,28 @@ def select_primary_key(conn, table):
             return _[name_field]
 
     raise ValueError('%s doesnt have a primary key?!')
+
+def select_dicts_of_fields(conn, query):
+    # split string between SELECT ... FROM
+    #  if matches '*', error: "Explicit field mapping required."
+
+    fields = [ _.strip() for _ in query.split("SELECT")[1].split("FROM")[0].split(",")] # :)
+
+    # leave the rest (tables exist, contain fields, ...) up to sqlite3.OperationalErrors
+
+    c       = conn.cursor()
+    results = c.execute(query) # TODO: make select_dict_of_fields injection-proof
+    rows    = results.fetchall()
+
+    return_list = [None] * len(rows)
+    dictionary_format = defaultdict()                  # TODO: should select_dicts_of_fields
+    for field in fields: dictionary_format[field] = '' # fill with EMPTIES or NULLS?
+    dictionary_format = dict(dictionary_format)
+
+    for r, row in enumerate(rows):
+        dictionary = dictionary_format.copy() # deep copy
+        for f, field in enumerate(fields):
+            dictionary[field] = row[f]
+        return_list[r] = dictionary
+
+    return return_list

@@ -12,6 +12,7 @@ class load_from_datastore_tester(unittest.TestCase):
 
         # Create a stub table
         try:
+            self.c.execute("""DROP table test;""")
             self.c.execute("""CREATE TABLE test (id INTEGER PRIMARY key, a TEXT, b TEXT, 
                                                  created_date TEXT, expire_date_TEXT);""")
             self.c.execute("""INSERT INTO test VALUES (1, 'a', 'b', 
