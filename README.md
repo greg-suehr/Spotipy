@@ -1,12 +1,11 @@
-Spotipy
+SpotiPI
 =========
 
 Spotipy is a lightweight Python library for the Spotify Web API. Learn more:
   - https://spotipy.readthedocs.io/en/latest/
   - https://developer.spotify.com/documentation/web-api/
   - https://developer.spotify.com/documentation/web-api/reference/object-model/
-This is a lightweight data cache and analysis environment as well as a few convenience
-scripts build on the Spotify Web API.
+SpotiPI is a lightweight data cache and analysis environment built on the API.
 
 ## Datastore
 
@@ -31,7 +30,7 @@ The analysis environment comprsises:
 
 ## Playlist Management
 
-Spotipy combines the Spotify Web API with some quick statistics to recommend edits
+SpotiPI combines the Spotify Web API with some quick statistics to recommend edits
 to user playlists. Predefined analyses include:
   - .flow: Resort a playlist to smooth transitions of MOOD, BPM, DANCEABILITY, etc
   - .trim: Recommend songs to cut to reduce variance in MOOD, BPM, DANCEABILITY, etc

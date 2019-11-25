@@ -4,3 +4,6 @@ img/*
 *~
 *.pw
 *.p # pickled files
+*.db
+*.db-journal
+*.dict

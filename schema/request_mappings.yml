@@ -7,3 +7,5 @@ columns:
     datatype: TEXT
   store_table_name:
     datatype: TEXT
+  expire_interval:
+    datatype: TEXT

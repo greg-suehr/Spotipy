@@ -1,0 +1,6 @@
+name: request_field_mappings
+columns:
+  request_mapping_id: # TODO: enforce foreign key constraints
+    datatype: INTEGER
+  field_mapping_id:   # TODO: enforce uniqueness constraints
+    datatype: INTEGER
