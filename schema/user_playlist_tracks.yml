@@ -1,0 +1,12 @@
+name: user_playlist_tracks
+columns:
+  username:
+    datatype: TEXT
+  playlist_uri:
+    datatype: TEXT
+  track_uri:
+    datatype: TEXT
+  created_date:
+    datatype: TEXT
+  expire_date:
+    datatype: TEXT
