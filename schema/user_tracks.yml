@@ -1,5 +1,3 @@
-# The Spotify Web API exposes an explicit genre classification for artists
-
 name: user_tracks
 columns:
   user_track_id:
@@ -8,12 +6,6 @@ columns:
   username:
     datatype: TEXT
   track_uri:
-    datatype: TEXT
-  playlists:
-    datatype: INTEGER
-  saved:
-    datatype: INTEGER
-  saved_date:
     datatype: TEXT
   is_heat_rock:
     datatype: INTEGER
