@@ -1,9 +1,0 @@
-gr*
-img/*
-*.pyc
-*~
-*.pw
-*.p # pickled files
-*.db
-*.db-journal
-*.dict

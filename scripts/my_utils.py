@@ -2,32 +2,46 @@ from spotipy import Spotify
 import spotipy.util as util
 from collections import defaultdict
 
-# TODO: move spaghetti into method
+# TODO: move spaghetti into method //no-commit
 user = 'gsuehr'
 token = util.prompt_for_user_token(user, 'playlist-read-private')
 sp = Spotify(auth=token)
 
-def build_P(user):
-    P = defaultdict()
+def all_playlists(user):
+    playlists = defaultdict()
 
-    # DANGER: if offset not set, could go for forever...
-    offset = 0
+    offset = 0    
     while True:
         response = sp.user_playlists(user, offset=offset)
         for item in response['items']:
             if (item['owner']['id'] == user):
-                P[ item['name'] ] = item['uri']
+                playlists[ item['uri'] ] = item['name']
 
         if len(response['items']) < response['limit']: break
         offset += response['limit']
  
-    return P
+    return playlists
 
-def build_S(user):
-    pass
+def all_playlist_tracks(user, playlists=None):
+    if playlists is None:
+        playlists = all_playlists(user)
+        
+    assert type(playlists) == defaultdict
+    tracks = defaultdict()
 
-def build_G(user):
-    pass
+    for playlist_id in playlists.keys():
+        offset = 0
 
-def build_W(user):
-    pass
+        while True:
+            response = sp.playlist_tracks(playlist_id, offset=offset)
+            for track in [_['track'] for _ in response['items']]:
+                tracks[track['uri']] = track['name']
+
+            if len(response['items']) < response['limit']: break
+            offset += response['limit']
+
+    return tracks
+
+def chunk_track_ids(track_ids, n=100):
+    for i in range(0,len(track_ids),n):
+        yield track_ids[i:i+n]
