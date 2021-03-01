@@ -1,4 +1,4 @@
-import bs4, wikipedia
+import bs4, re, wikipedia
 from collections import defaultdict
 
 
@@ -20,8 +20,10 @@ def get_pages(genre_names):
             pages[k] = "ambiguous"
     return pages
 
-def parse_for_origin(info):
+def parse_for_origin(info):    
     parents = set()
+    tidyreg = re.compile('[^a-zA-Z ]')
+    
     for row in info.find_all('tbody'):
         if 'stylistic origins' not in str(row).lower():
             continue
@@ -29,6 +31,7 @@ def parse_for_origin(info):
         for tr in row.find_all('tr'):
             if 'origins' in str(tr).lower():
                 for genre in row.find_all('li'):
-                    parents.add(genre.text.replace('-',''))
+                    tidytext = tidyreg.sub('', genre.text)
+                    parents.add(tidytext.lower())
                     
     return list(parents)
