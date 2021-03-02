@@ -1,0 +1,6 @@
+scripts/setup.sh
+.cache*
+*.pyc
+*~
+*.db
+*.db-journal
