@@ -15,8 +15,10 @@ class Classifier(Spotify):
 
         
     def authenticate(self):
-        token = util.prompt_for_user_token(self.user,self.auth)
+        token   = util.prompt_for_user_token(self.user,self.auth)
         self.sp = Spotify(auth=token)
+        
+        return token
 
 
     def all_playlists(self):
