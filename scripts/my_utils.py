@@ -141,8 +141,13 @@ class Classifier(Spotify):
 
     
     def filter_items(self,items,keys,match):
+        """
+        Iterates through a list of nested objects, stepping down the object
+        hierarchy 
+        """
         remain = []
 
+        # if this into a list comprehension, I wouldn't comprehend it
         for item in items:
             child = item
             for key in keys:
