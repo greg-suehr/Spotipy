@@ -47,13 +47,11 @@ The following tools will evenutally be provided through a hosted React app:
   [] Sort a list of playlists by attributes:
   
       >  .sort( playlists, [{attribute: []}] )
-      >  # sorts playlists by a track numeric feature
+      >  # sorts playlists by a numeric `attribute` 
       >
-      > .sort( [{atrribute: [tier1, tier2, tier3)}, 
-      >  # sorts playlists by 
-      >   
-      >
-      >
+      > .sort( [{atrribute: [tier1, tier2, tier3]} , 
+      >  # sorts playlists into a list of chunks defined by a max `tier` value
+      >  # .sort([1, 2, 3, 5, 8, 11], [3, 6]) = [[1,2,3], [5,8], [11]] 
 
   [] Reorder a list of playlists to ramp up to the maximum attribute value:
 
