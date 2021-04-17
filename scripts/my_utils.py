@@ -4,23 +4,51 @@ from spotipy.oauth2 import SpotifyOauthError
 from collections import defaultdict
 
 
+def chunk(l,n):
+    for i in range(0, len(l), n):  
+        yield l[i:i + n]
+
+
 class Classifier(Spotify):
     def __init__(self, user, auth='playlist-read-private'):
         super().__init__()
         self.user   = user
         self.auth   = auth
         self.token  = self.authenticate()
-        self.sp     = Spotify(auth=token)
-        self.acache = defaultdict()
+        self.sp     = Spotify(auth=self.token)
+        self.artist_cache = defaultdict()
+        self.playlist_track = defaultdict()
 
         
     def authenticate(self):
         token   = util.prompt_for_user_token(self.user,self.auth)
         self.sp = Spotify(auth=token)
         
-        return token
+        return token            
+                
+    def _populate_artist_cache(self):
+        if len(self.playlist_track) == 0:
+            self._populate_playlist_tracks_cache()
+
+        for pid,tracklist in self.playlist_track.items():
+            for track in tracklist:
+                for artist in track['artists']:
+                    self.artist_cache[artist['uri']] = None
 
 
+        artists = []
+        for aids in chunk(list(self.artist_cache.keys()), 50):
+            artists += self.sp.artists(aids)['artists']
+
+        for artist in artists:
+            self.artist_cache[artist['uri']] = artist
+
+            
+    def _populate_playlist_tracks_cache(self):
+        self.playlist_track = self.all_playlist_tracks(self.all_playlists())
+        
+
+    
     def all_playlists(self):
         p = self.items_from_method('items',
                                    self.sp.user_playlists,
@@ -30,8 +58,8 @@ class Classifier(Spotify):
 
         return p
 
-    
-    def playlist_genres(self, pid, group='track'):
+        
+    def add_genres_to_playlist_tracks(self, pid, group='track'):
         """
         Inputs
         user - string - Spotify username matching token
@@ -42,34 +70,21 @@ class Classifier(Spotify):
           tracks{'uri' : {'name' : str, 'genres' : list}}
           tracks{'uri' : {'artists' : {'uri' : int, name : str, genres : list
         """
-        ptrack = self.items_from_method('items',
+        if len(self.artist_cache) == 0:
+            self._populate_artist_cache()
+            
+        playlist_track = self.items_from_method('items',
                                    self.sp.playlist_tracks,
                                    pid)
 
-        def chunk(l,n):
-            for i in range(0, len(l), n):  
-                yield l[i:i + n]
-
-        # add to the artists cache
-        for track in ptrack:
-            for artist in track['track']['artists']:
-                self.acache[artist['uri']] = None
-
-        artists = []
-        for aids in chunk(list(self.acache.keys()), 50):
-            artists += self.sp.artists(aids)['artists']
-
-        for artist in artists:
-            self.acache[artist['uri']] = artist
-            
         tracks = defaultdict()
-        for track in ptrack:
+        for track in playlist_track:
             track  = track['track']
             genres = []
 
             aids    = [_['uri'] for _ in track['artists']]
             
-            artists = [self.acache[aid] for aid in aids]
+            artists = [self.artist_cache[aid] for aid in aids]
 
             for artist in artists:
                 genres += [_ for _ in artist['genres']]
@@ -89,14 +104,13 @@ class Classifier(Spotify):
         if playlists is None:
             playlists = self.all_playlists()
 
-        ptracks = defaultdict()
+        playlist_tracks = defaultdict()
         for playlist in playlists:
             pid          = playlist['uri']
-            ptracks[pid] = self.items_from_method('items',
-                                                  self.sp.playlist_tracks,
-                                                  pid)
-        return ptracks
-
+            items = self.items_from_method('items',self.sp.playlist_tracks,pid)
+            playlist_tracks[pid] = [_['track'] for _ in items]
+                                                  
+        return playlist_tracks
 
 
     def playlist_genres_by_artist(self, playlists):
@@ -109,7 +123,7 @@ class Classifier(Spotify):
         """
         
         genres = defaultdict(list)
-        ptracks = self.all_playlist_tracks(playlists)
+        playlist_tracks = self.all_playlist_tracks(playlists)
         return genres
 
     
