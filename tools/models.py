@@ -5,6 +5,7 @@ from django.db import models
 class User(models.Model):
     uri  = models.CharField(max_length = 255, primary_key = True)
     name = models.CharField(max_length = 31) # Spotify's limit is 30
+    password = models.CharField(max_length = 255) # TODO: django authenitication
     last_login = models.DateTimeField(auto_now=True)
 
     def __str__(self):
